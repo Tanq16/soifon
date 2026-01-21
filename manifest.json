@@ -2,13 +2,12 @@
   "manifest_version": 3,
   "name": "Soifon",
   "version": "1.0",
-  "description": "Copy session token and SAML assertion value for CLI use",
+  "description": "Monitor traffic and storage for given URL rules and record regex matched values",
   "permissions": [
     "webRequest",
     "storage",
     "cookies",
     "scripting",
-    "offscreen",
     "tabs",
     "notifications"
   ],

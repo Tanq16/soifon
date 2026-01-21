@@ -1,26 +1,25 @@
-// --- TAB SWITCHING ---
-window.switchTab = (tabId) => {
+function switchTab(tabId) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById(tabId).classList.add('active');
-  document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+  document.querySelector(`button[data-tab="${tabId}"]`).classList.add('active');
 }
 
-// --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
   loadRules();
   loadCapturedData();
-  
+
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
   document.getElementById('add-net-btn').addEventListener('click', addNetworkRule);
   document.getElementById('add-store-btn').addEventListener('click', addStorageRule);
+  document.getElementById('clear-captured-btn').addEventListener('click', clearCapturedData);
 });
 
-// --- CAPTURED DATA LOGIC ---
-async function loadCapturedData() {
-  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab) return;
-
-  chrome.runtime.sendMessage({ type: 'GET_TAB_DATA', tabId: tab.id }, (data) => {
+function loadCapturedData() {
+  chrome.runtime.sendMessage({ type: 'GET_CAPTURED_DATA' }, (data) => {
     const list = document.getElementById('captured-list');
     const noData = document.getElementById('no-data');
     list.innerHTML = '';
@@ -35,24 +34,35 @@ async function loadCapturedData() {
       const div = document.createElement('div');
       div.className = 'item-card';
       div.innerHTML = `
-        <strong>${item.name}</strong> 
-        <span style="font-size:10px; color:#666">(${item.source})</span>
-        <button class="copy-btn">Copy</button>
+        <strong>${item.name}</strong>
+        <span style="font-size:10px; color:#666; margin-left:10px;">${item.timestamp}</span>
+        <button class="copy-btn" data-value="${encodeURIComponent(item.value)}">Copy</button>
         <div style="font-size:10px; color: #888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;">
-          ${item.value}
+          ${item.value.substring(0, 100)}...
         </div>
       `;
-      div.querySelector('.copy-btn').addEventListener('click', () => {
-        navigator.clipboard.writeText(item.value);
-        div.querySelector('.copy-btn').innerText = 'Copied!';
-        setTimeout(() => div.querySelector('.copy-btn').innerText = 'Copy', 1500);
+
+      div.querySelector('.copy-btn').addEventListener('click', (e) => {
+        const value = decodeURIComponent(e.target.dataset.value);
+        navigator.clipboard.writeText(value).then(() => {
+          e.target.innerText = 'Copied!';
+          setTimeout(() => e.target.innerText = 'Copy', 1500);
+        });
       });
+
       list.appendChild(div);
     });
   });
 }
 
-// --- RULES LOGIC ---
+function clearCapturedData() {
+  if (confirm('Clear all captured data?')) {
+    chrome.runtime.sendMessage({ type: 'CLEAR_CAPTURED_DATA' }, () => {
+      loadCapturedData();
+    });
+  }
+}
+
 function loadRules() {
   chrome.storage.local.get(['networkRules', 'storageRules'], (result) => {
     renderNetworkRules(result.networkRules || []);
@@ -66,30 +76,12 @@ function renderNetworkRules(rules) {
   rules.forEach((rule, index) => {
     const div = document.createElement('div');
     div.className = 'item-card';
-    div.style.borderLeftColor = '#10b981';
     div.innerHTML = `
       <strong>${rule.name}</strong>
       <button class="del-btn" data-idx="${index}">Del</button>
-      <div style="font-size:10px; color:#555;">URL: ${rule.urlPattern}</div>
+      <div style="font-size:10px; color:#888;">URL: ${rule.urlPattern}</div>
     `;
-    div.querySelector('.del-btn').addEventListener('click', () => deleteRule('networkRules', index));
-    container.appendChild(div);
-  });
-}
-
-function renderStorageRules(rules) {
-  const container = document.getElementById('storage-rules-list');
-  container.innerHTML = '';
-  rules.forEach((rule, index) => {
-    const div = document.createElement('div');
-    div.className = 'item-card';
-    div.style.borderLeftColor = '#db2777';
-    div.innerHTML = `
-      <strong>${rule.name}</strong>
-      <button class="del-btn" data-idx="${index}">Del</button>
-      <div style="font-size:10px; color:#555;">${rule.source}: ${rule.key}</div>
-    `;
-    div.querySelector('.del-btn').addEventListener('click', () => deleteRule('storageRules', index));
+    div.querySelector('.del-btn').addEventListener('click', () => deleteRule(index));
     container.appendChild(div);
   });
 }
@@ -106,7 +98,6 @@ function addNetworkRule() {
     rules.push({ name, urlPattern: url, valueRegex: regex });
     chrome.storage.local.set({ networkRules: rules }, () => {
       loadRules();
-      // clear inputs
       document.getElementById('net-name').value = '';
       document.getElementById('net-url').value = '';
       document.getElementById('net-regex').value = '';
@@ -114,20 +105,34 @@ function addNetworkRule() {
   });
 }
 
+function renderStorageRules(rules) {
+  const container = document.getElementById('storage-rules-list');
+  container.innerHTML = '';
+  rules.forEach((rule, index) => {
+    const div = document.createElement('div');
+    div.className = 'item-card';
+    div.innerHTML = `
+      <strong>${rule.name}</strong>
+      <button class="del-btn" data-idx="${index}">Del</button>
+      <div style="font-size:10px; color:#888;">Key: ${rule.key}</div>
+    `;
+    div.querySelector('.del-btn').addEventListener('click', () => deleteStorageRule(index));
+    container.appendChild(div);
+  });
+}
+
 function addStorageRule() {
   const name = document.getElementById('store-name').value;
   const url = document.getElementById('store-url').value;
-  const type = document.getElementById('store-type').value;
   const key = document.getElementById('store-key').value;
 
   if (!name || !url || !key) return alert("Fill all fields");
 
   chrome.storage.local.get(['storageRules'], (res) => {
     const rules = res.storageRules || [];
-    rules.push({ name, urlPattern: url, source: type, key: key });
+    rules.push({ name, urlPattern: url, key: key });
     chrome.storage.local.set({ storageRules: rules }, () => {
       loadRules();
-      // clear inputs
       document.getElementById('store-name').value = '';
       document.getElementById('store-url').value = '';
       document.getElementById('store-key').value = '';
@@ -135,10 +140,18 @@ function addStorageRule() {
   });
 }
 
-function deleteRule(storeKey, index) {
-  chrome.storage.local.get([storeKey], (res) => {
-    const rules = res[storeKey] || [];
+function deleteRule(index) {
+  chrome.storage.local.get(['networkRules'], (res) => {
+    const rules = res.networkRules || [];
     rules.splice(index, 1);
-    chrome.storage.local.set({ [storeKey]: rules }, loadRules);
+    chrome.storage.local.set({ networkRules: rules }, loadRules);
+  });
+}
+
+function deleteStorageRule(index) {
+  chrome.storage.local.get(['storageRules'], (res) => {
+    const rules = res.storageRules || [];
+    rules.splice(index, 1);
+    chrome.storage.local.set({ storageRules: rules }, loadRules);
   });
 }

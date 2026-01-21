@@ -1,10 +1,86 @@
-chrome.runtime.onMessage.addListener((message) => {
-  if (message.type === 'COPY_TO_CLIPBOARD') {
-    const text = message.text;
-    const textArea = document.getElementById('clipboard-area');
-    textArea.value = text;
-    textArea.select();
-    document.execCommand('copy');
-    console.log("Text copied to clipboard via Offscreen document.");
-  }
-});
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    html, body {
+      width: 600px;
+      height: 500px;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: monospace;
+      padding: 15px;
+      background: #1a1a1a;
+      color: #e8e8e8;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+
+    h2 { font-size: 16px; margin: 0 0 10px 0; border-bottom: 2px solid #3a3a3a; padding-bottom: 5px; color: #d4a017; }
+
+    .tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
+    .tab-btn { flex: 1; padding: 8px; border: none; cursor: pointer; background: #2a2a2a; font-weight: bold; color: #999; }
+    .tab-btn.active { background: #d4a017; color: #1a1a1a; }
+
+    .panel { display: none; overflow-y: auto; flex: 1; }
+    .panel.active { display: block; }
+
+    .item-card { background: #252525; padding: 10px; margin-bottom: 8px; border-left: 4px solid #d4a017; }
+    .item-card button { float: right; cursor: pointer; margin-left: 5px;}
+
+    label { display: block; font-size: 11px; margin-top: 5px; font-weight: bold; color: #999; }
+    input, select { width: 100%; padding: 5px; margin-top: 2px; box-sizing: border-box; border: 1px solid #3a3a3a; background: #2a2a2a; color: #e8e8e8; }
+
+    .add-btn { background: #d4a017; color: #1a1a1a; width: 100%; padding: 8px; border: none; margin-top: 10px; cursor: pointer; font-weight: bold; }
+    .del-btn { background: #8a6d0f; color: #1a1a1a; border: none; padding: 2px 5px; font-size: 10px; font-weight: bold; }
+    .copy-btn { background: #d4a017; color: #1a1a1a; border: none; padding: 4px 8px; font-size: 12px; font-weight: bold; }
+
+    #no-data { text-align: center; color: #666; font-style: italic; margin-top: 20px; }
+  </style>
+</head>
+<body>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="captured">Captured</button>
+    <button class="tab-btn" data-tab="settings">Settings</button>
+  </div>
+
+  <div id="captured" class="panel active">
+    <h2>Captured Data <button id="clear-captured-btn" class="del-btn" style="float:right;">Clear All</button></h2>
+    <div id="captured-list"></div>
+    <div id="no-data">No data captured yet.</div>
+  </div>
+
+  <div id="settings" class="panel">
+    <h2>Network Auto-Copy Rules</h2>
+    <div id="network-rules-list"></div>
+    <div style="background: #2a2a2a; padding: 10px; margin-top: 10px; border: 1px solid #3a3a3a;">
+      <label>Rule Name</label>
+      <input type="text" id="net-name" placeholder="e.g. AWS SAML">
+      <label>URL Regex (Trigger)</label>
+      <input type="text" id="net-url" placeholder="signin.aws.amazon.com">
+      <label>Body Regex (Capture Group 1)</label>
+      <input type="text" id="net-regex" placeholder="SAMLResponse=([^&]+)">
+      <button class="add-btn" id="add-net-btn">Add Network Rule</button>
+    </div>
+
+    <h2 style="margin-top: 20px;">Storage Extraction Rules</h2>
+    <div id="storage-rules-list"></div>
+    <div style="background: #2a2a2a; padding: 10px; margin-top: 10px; border: 1px solid #3a3a3a;">
+      <label>Rule Name</label>
+      <input type="text" id="store-name" placeholder="e.g. Session Token">
+      <label>URL Regex (Trigger)</label>
+      <input type="text" id="store-url" placeholder="mywebsite.com">
+      <label>Key Name</label>
+      <input type="text" id="store-key" placeholder="auth_token">
+      <button class="add-btn" id="add-store-btn">Add Storage Rule</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
