@@ -43,6 +43,16 @@ chrome.webRequest.onBeforeRequest.addListener(
 
           if (match && match[1]) {
             const capturedValue = match[1];
+
+            // Skip if this rule already captured the exact same value
+            const isDuplicate = allCapturedData.some(
+              item => item.name === rule.name && item.value === capturedValue
+            );
+            if (isDuplicate) {
+              console.log(`[Soifon] Skipping duplicate: ${rule.name}`);
+              return;
+            }
+
             console.log(`[Soifon] ✓ Captured: ${rule.name}, length: ${capturedValue.length}`);
 
             allCapturedData.unshift({
@@ -57,7 +67,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 
             chrome.notifications.create({
               type: 'basic',
-              iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+              iconUrl: 'icons/icon128.png',
               title: 'Soifon',
               message: `✓ Captured: ${rule.name}`
             });
@@ -93,6 +103,15 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
               const storageData = results[0].result;
 
               if (storageData.value) {
+                // Skip if this rule already captured the exact same value
+                const isDuplicate = allCapturedData.some(
+                  item => item.name === rule.name && item.value === storageData.value
+                );
+                if (isDuplicate) {
+                  console.log(`[Soifon] Skipping duplicate: ${rule.name}`);
+                  return;
+                }
+
                 console.log(`[Soifon] ✓ Captured from ${storageData.source}: ${rule.name}`);
 
                 allCapturedData.unshift({
@@ -107,7 +126,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
                 chrome.notifications.create({
                   type: 'basic',
-                  iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+                  iconUrl: 'icons/icon128.png',
                   title: 'Soifon',
                   message: `✓ Captured: ${rule.name}`
                 });
@@ -120,6 +139,15 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
           chrome.cookies.getAll({ url: tab.url }, (cookies) => {
             const cookie = cookies.find(c => c.name === rule.key);
             if (cookie) {
+              // Skip if this rule already captured the exact same value
+              const isDuplicate = allCapturedData.some(
+                item => item.name === rule.name && item.value === cookie.value
+              );
+              if (isDuplicate) {
+                console.log(`[Soifon] Skipping duplicate: ${rule.name}`);
+                return;
+              }
+
               console.log(`[Soifon] ✓ Captured from cookie: ${rule.name}`);
 
               allCapturedData.unshift({
@@ -134,7 +162,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 
               chrome.notifications.create({
                 type: 'basic',
-                iconUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+                iconUrl: 'icons/icon128.png',
                 title: 'Soifon',
                 message: `✓ Captured: ${rule.name}`
               });
