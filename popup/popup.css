@@ -1,0 +1,73 @@
+:root {
+  --rosewater: #f5e0dc;
+  --flamingo: #f2cdcd;
+  --pink: #f5c2e7;
+  --mauve: #cba6f7;
+  --red: #f38ba8;
+  --maroon: #eba0ac;
+  --peach: #fab387;
+  --yellow: #f9e2af;
+  --green: #a6e3a1;
+  --teal: #94e2d5;
+  --sky: #89dceb;
+  --sapphire: #74c7ec;
+  --blue: #89b4fa;
+  --lavender: #b4befe;
+  --text: #cdd6f4;
+  --subtext1: #bac2de;
+  --subtext0: #a6adc8;
+  --overlay2: #9399b2;
+  --overlay1: #7f849c;
+  --overlay0: #6c7086;
+  --surface2: #585b70;
+  --surface1: #45475a;
+  --surface0: #313244;
+  --base: #1e1e2e;
+  --mantle: #181825;
+  --crust: #11111b;
+}
+
+html, body {
+  width: 600px;
+  height: 500px;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  font-family: monospace;
+  padding: 15px;
+  background: var(--base);
+  color: var(--text);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  font-size: 16px;
+  margin: 0 0 10px 0;
+  border-bottom: 2px solid var(--surface1);
+  padding-bottom: 5px;
+  color: var(--yellow);
+}
+
+.tabs { display: flex; gap: 10px; margin-bottom: 15px; flex-shrink: 0; }
+.tab-btn { flex: 1; padding: 8px; border: none; cursor: pointer; background: var(--surface0); font-weight: bold; color: var(--overlay0); }
+.tab-btn.active { background: var(--yellow); color: var(--base); }
+
+.panel { display: none; overflow-y: auto; flex: 1; }
+.panel.active { display: block; }
+
+.item-card { background: var(--mantle); padding: 10px; margin-bottom: 8px; border-left: 4px solid var(--yellow); }
+.item-card button { float: right; cursor: pointer; margin-left: 5px; }
+
+label { display: block; font-size: 11px; margin-top: 5px; font-weight: bold; color: var(--overlay0); }
+input, select { width: 100%; padding: 5px; margin-top: 2px; box-sizing: border-box; border: 1px solid var(--surface1); background: var(--surface0); color: var(--text); }
+
+.add-btn { background: var(--yellow); color: var(--base); width: 100%; padding: 8px; border: none; margin-top: 10px; cursor: pointer; font-weight: bold; }
+.del-btn { background: var(--surface2); color: var(--text); border: none; padding: 2px 5px; font-size: 10px; font-weight: bold; }
+.copy-btn { background: var(--yellow); color: var(--base); border: none; padding: 4px 8px; font-size: 12px; font-weight: bold; }
+
+#no-data { text-align: center; color: var(--overlay0); font-style: italic; margin-top: 20px; }

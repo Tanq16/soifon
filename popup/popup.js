@@ -35,9 +35,9 @@ function loadCapturedData() {
       div.className = 'item-card';
       div.innerHTML = `
         <strong>${item.name}</strong>
-        <span style="font-size:10px; color:#666; margin-left:10px;">${item.timestamp}</span>
+        <span style="font-size:10px; color:var(--overlay0); margin-left:10px;">${item.timestamp}</span>
         <button class="copy-btn" data-value="${encodeURIComponent(item.value)}">Copy</button>
-        <div style="font-size:10px; color: #888; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;">
+        <div style="font-size:10px; color: var(--overlay1); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; margin-top:4px;">
           ${item.value.substring(0, 100)}...
         </div>
       `;
@@ -79,7 +79,7 @@ function renderNetworkRules(rules) {
     div.innerHTML = `
       <strong>${rule.name}</strong>
       <button class="del-btn" data-idx="${index}">Del</button>
-      <div style="font-size:10px; color:#888;">URL: ${rule.urlPattern}</div>
+      <div style="font-size:10px; color:var(--overlay1);">URL: ${rule.urlPattern}</div>
     `;
     div.querySelector('.del-btn').addEventListener('click', () => deleteRule(index));
     container.appendChild(div);
@@ -114,7 +114,7 @@ function renderStorageRules(rules) {
     div.innerHTML = `
       <strong>${rule.name}</strong>
       <button class="del-btn" data-idx="${index}">Del</button>
-      <div style="font-size:10px; color:#888;">Key: ${rule.key}</div>
+      <div style="font-size:10px; color:var(--overlay1);">Key: ${rule.key}</div>
     `;
     div.querySelector('.del-btn').addEventListener('click', () => deleteStorageRule(index));
     container.appendChild(div);

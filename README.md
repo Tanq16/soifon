@@ -2,9 +2,12 @@
 <img src="logo.svg" alt="Soifon Logo" width="200">
 <h1>Soifon</h1>
 
+![Build](https://github.com/Tanq16/soifon/actions/workflows/release.yaml/badge.svg)
+![Release](https://img.shields.io/github/v/release/Tanq16/soifon)
+
 <p><b>Soifon</b> is a browser extension that monitors network traffic and browser storage for given URL rules, automatically capturing and recording regex-matched values from requests and browser storage.</p><br>
 
-<a href="#features">Features</a>&nbsp;&bull;&nbsp;<a href="#installation">Installation</a>&nbsp;&bull;&nbsp;<a href="#usage">Usage</a>
+<a href="#features">Features</a>&nbsp;&bull;&nbsp;<a href="#installation">Installation</a>&nbsp;&bull;&nbsp;<a href="#usage">Usage</a>&nbsp;&bull;&nbsp;<a href="#security">Security</a>
 </div>
 
 ---
@@ -84,3 +87,12 @@ Soifon requires the following permissions:
 - `tabs`: Access tab information
 - `notifications`: Show capture notifications
 - `<all_urls>`: Monitor requests across all websites
+
+## Security
+
+Soifon is designed for **developer and security workflows** such as capturing SAML assertions, session tokens, and API keys for debugging and testing purposes.
+
+- All captured data is stored **locally** in Chrome's extension storage and is never transmitted externally
+- The extension requires broad permissions (`<all_urls>`, `tabs`, `webRequest`) to monitor arbitrary URLs based on user-defined rules -- these permissions are necessary for core functionality
+- Review your configured rules carefully, as the extension will capture and store any values that match your regex patterns
+- Clear captured data regularly, especially when working with sensitive credentials
